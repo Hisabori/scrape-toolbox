@@ -1,0 +1,14 @@
+/* 스크롤 감지 시 navbar blur 효과용 */
+.navbar.backdrop-blur {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 반응형 카드 간격 등 감성 강화 */
+.card {
+  transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-4px);
+}

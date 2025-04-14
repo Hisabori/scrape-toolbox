@@ -1,0 +1,13 @@
+/* src/styles/App.css */
+.navbar.backdrop-blur {
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.75) !important;
+    transition: all 0.3s ease-in-out;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-4px);
+}
