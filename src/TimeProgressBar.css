@@ -1,0 +1,25 @@
+.wave-lunch {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: repeating-linear-gradient(
+            45deg,
+            rgba(255, 193, 7, 0.4),
+            rgba(255, 193, 7, 0.4) 10px,
+            rgba(255, 193, 7, 0.3) 10px,
+            rgba(255, 193, 7, 0.3) 20px
+    );
+    animation: wave 2s linear infinite;
+    z-index: 1;
+    border-radius: 1rem;
+    pointer-events: none;
+}
+
+@keyframes wave {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 40px 0;
+    }
+}

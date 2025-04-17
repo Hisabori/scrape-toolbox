@@ -1,65 +1,40 @@
-// TimeProgressBar.js
-import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React from "react";
+import "./TimeProgressBar.css";
 
 export default function TimeProgressBar() {
-    const [percentage, setPercentage] = useState(0);
-
-    useEffect(() => {
-        const updateTime = () => {
-            const now = new Date();
-            const start = new Date();
-            const end = new Date();
-
-            start.setHours(8, 30, 0);
-            end.setHours(17, 50, 0);
-
-            const lunchStart = new Date();
-            const lunchEnd = new Date();
-            lunchStart.setHours(12, 0, 0);
-            lunchEnd.setHours(13, 0, 0);
-
-            const totalTime = end - start;
-            const elapsed = now - start;
-
-            const clampedElapsed = Math.max(0, Math.min(elapsed, totalTime));
-            const percent = (clampedElapsed / totalTime) * 100;
-            setPercentage(percent);
-        };
-
-        updateTime();
-        const interval = setInterval(updateTime, 60 * 1000); // 매 1분마다 업데이트
-        return () => clearInterval(interval);
-    }, []);
+    const START_HOUR = 7;
+    const END_HOUR = 18;
+    const TOTAL_HOURS = END_HOUR - START_HOUR;
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMin = now.getMinutes();
+    const progress =
+        ((currentHour + currentMin / 60 - START_HOUR) / TOTAL_HOURS) * 100;
 
     return (
-        <div className="container my-4">
-            <div className="d-flex justify-content-between">
-                <span>🕗 8:30</span>
-                <span>🍽 점심 12:00~13:00</span>
-                <span>🕔 17:50</span>
-            </div>
-            <div className="progress my-2" style={{ height: "30px", borderRadius: "15px" }}>
-                {/* 전체 시간 진행 바 */}
+        <div className="time-bar-container px-3 pt-2">
+            <p className="mb-2 fw-semibold">출입문 개방 시간: 07:00 ~ 18:00 (점심시간: 12:00 ~ 13:00)</p>
+            <div className="progress position-relative rounded-4" style={{ height: "30px", backgroundColor: "#e9ecef" }}>
+                {/* 점심시간 영역 (물결 효과) */}
                 <div
-                    className="progress-bar bg-primary"
-                    role="progressbar"
-                    style={{ width: `${percentage}%` }}
-                >
-                    <strong>{Math.round(percentage)}%</strong>
-                </div>
-
-                {/* 점심 시간 영역 표시 (절대 위치) */}
-                <div
+                    className="wave-lunch"
                     style={{
-                        position: "absolute",
-                        left: `${((12.0 - 8.5) / (17.833 - 8.5)) * 100}%`,
-                        width: `${(1 / (17.833 - 8.5)) * 100}%`,
-                        height: "30px",
-                        backgroundColor: "rgba(255, 193, 7, 0.5)",
-                        zIndex: 0,
+                        left: `${(12 - START_HOUR) * 100 / TOTAL_HOURS}%`,
+                        width: `${(1 * 100) / TOTAL_HOURS}%`,
                     }}
                 ></div>
+
+                {/* 현재 시각 진행 바 */}
+                <div
+                    className="progress-bar bg-success position-relative"
+                    role="progressbar"
+                    style={{
+                        width: `${Math.min(progress, 100)}%`,
+                        zIndex: 2,
+                    }}
+                >
+                    {currentHour}:{currentMin.toString().padStart(2, "0")}
+                </div>
             </div>
         </div>
     );

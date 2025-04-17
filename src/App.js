@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import TimeProgressBar from "./TimeProgressBar"; // ✅ 추가된 부분
+import TimeProgressBar from "./TimeProgressBar"; // 경로 확인 필요!
 
 export default function App() {
     const [doctors, setDoctors] = useState([]);
@@ -38,6 +38,7 @@ export default function App() {
 
     return (
         <div>
+            {/* 네비게이션 바 */}
             <nav
                 className={`navbar navbar-expand-lg fixed-top shadow-sm p-3 mb-5 ${
                     isScrolled ? "backdrop-blur border-bottom" : "bg-opacity-100"
@@ -62,12 +63,10 @@ export default function App() {
                 </div>
             </nav>
 
-            {/* ✅ 운영시간 프로그래스 바 추가 */}
-            <div className="mt-5 pt-2">
+            <div className="container mt-5 pt-5">
+                {/* 출입문 시간 진행 바 */}
                 <TimeProgressBar />
-            </div>
 
-            <div className="container mt-3">
                 <h2 className="my-4">성인정신과 의료진 목록</h2>
                 {filteredDoctors.length === 0 ? (
                     <p className="text-muted">검색 결과가 없습니다.</p>
