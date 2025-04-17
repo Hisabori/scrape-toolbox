@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import TimeProgressBar from "./TimeProgressBar"; // 경로 확인 필요!
 
 export default function App() {
     const [doctors, setDoctors] = useState([]);
     const [isScrolled, setIsScrolled] = useState(false);
     const [search, setSearch] = useState("");
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [timePercent, setTimePercent] = useState(0);
 
     useEffect(() => {
         const fetchDoctors = async () => {
@@ -28,17 +29,44 @@ export default function App() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    const filteredDoctors = doctors.filter(
-        (doc) =>
+    useEffect(() => {
+        const updateTimePercent = () => {
+            const now = new Date();
+            const start = new Date();
+            start.setHours(8, 30, 0);
+            const end = new Date();
+            end.setHours(17, 50, 0);
+            const total = end - start;
+            const passed = now - start;
+            const percent = Math.max(0, Math.min(100, (passed / total) * 100));
+            setTimePercent(percent);
+        };
+        updateTimePercent();
+        const interval = setInterval(updateTimePercent, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const toggleDarkMode = () => {
+        setIsDarkMode((prev) => !prev);
+    };
+
+    const getCurrentHour = () => new Date().getHours();
+    const isDuringConsultation = () => {
+        const hour = getCurrentHour();
+        return hour >= 8 && hour < 18;
+    };
+
+    const filteredDoctors = doctors.filter((doc) => {
+        const matchesSearch =
             doc.name.includes(search) ||
             doc.specialty.includes(search) ||
             doc.experience.includes(search) ||
-            (doc.activity && doc.activity.includes(search))
-    );
+            (doc.activity && doc.activity.includes(search));
+        return matchesSearch && (isDuringConsultation() ? true : false);
+    });
 
     return (
-        <div>
-            {/* 네비게이션 바 */}
+        <div className={isDarkMode ? "bg-dark text-white" : "bg-light text-dark"} style={{ minHeight: "100vh" }}>
             <nav
                 className={`navbar navbar-expand-lg fixed-top shadow-sm p-3 mb-5 ${
                     isScrolled ? "backdrop-blur border-bottom" : "bg-opacity-100"
@@ -53,9 +81,12 @@ export default function App() {
                     <a className="navbar-brand fw-bold" href="#">
                         국립정신건강센터 의료진
                     </a>
+                    <button className="btn btn-sm btn-outline-secondary ms-2" onClick={toggleDarkMode}>
+                        {isDarkMode ? "☀️ Light" : "🌙 Dark"}
+                    </button>
                     <input
                         type="search"
-                        className="form-control w-50 ms-auto"
+                        className="form-control w-50 ms-2"
                         placeholder="#해시태그로 검색"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -64,17 +95,32 @@ export default function App() {
             </nav>
 
             <div className="container mt-5 pt-5">
-                {/* 출입문 시간 진행 바 */}
-                <TimeProgressBar />
+                <div className="my-4">
+                    <div className="d-flex justify-content-between">
+                        <span>⏰ 운영시간 08:30~17:50</span>
+                        <span>{timePercent.toFixed(1)}%</span>
+                    </div>
+                    <div className="progress rounded-pill" style={{ height: "14px" }}>
+                        <div
+                            className="progress-bar bg-info progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            style={{ width: `${timePercent}%` }}
+                        />
+                    </div>
+                </div>
 
-                <h2 className="my-4">성인정신과 의료진 목록</h2>
+                <h2 className="my-4">
+                    성인정신과 의료진 목록{" "}
+                    {!isDuringConsultation() && <span className="badge bg-warning text-dark">비진료시간</span>}
+                </h2>
+
                 {filteredDoctors.length === 0 ? (
-                    <p className="text-muted">검색 결과가 없습니다.</p>
+                    <p className="text-muted">검색 결과가 없거나 현재 진료 중인 의사가 없습니다.</p>
                 ) : (
                     <div className="row">
                         {filteredDoctors.map((doc, index) => (
                             <div className="col-md-6 mb-4" key={index}>
-                                <div className="card shadow rounded-4 border-0 h-100">
+                                <div className={`card shadow rounded-4 border-0 h-100 ${isDarkMode ? "bg-secondary text-white" : ""}`}>
                                     <div className="card-body">
                                         <h5 className="card-title fw-bold">👨‍⚕️ {doc.name}</h5>
                                         <p className="card-text">
