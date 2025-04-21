@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import TestToggleButton from "./components/TestToggleButton"; // 분리된 버튼 컴포넌트 import
 
 export default function App() {
     const [doctors, setDoctors] = useState([]);
@@ -7,11 +8,20 @@ export default function App() {
     const [search, setSearch] = useState("");
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [timePercent, setTimePercent] = useState(0);
+    const [showTestMark, setShowTestMark] = useState(false); // 테스트 버튼 상태
+
+    const toggleTestMark = () => setShowTestMark((prev) => !prev);
 
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
-                const response = await fetch("http://172.19.206.104:5000/api/doctors?dept=adult");
+                //NCMH
+                const response = await fetch("http://172.16.2.196:5000/api/doctors?dept=adult");
+
+
+
+                //시흥
+                //const response = await fetch("http://192.168.45.233:5000/api/doctors?dept=adult");
                 const data = await response.json();
                 const filtered = data.filter((doc) => doc.name && doc.specialty && doc.experience);
                 setDoctors(filtered);
@@ -33,9 +43,9 @@ export default function App() {
         const updateTimePercent = () => {
             const now = new Date();
             const start = new Date();
-            start.setHours(8, 30, 0);
+            start.setHours(7, 0, 0);
             const end = new Date();
-            end.setHours(17, 50, 0);
+            end.setHours(18, 0, 0);
             const total = end - start;
             const passed = now - start;
             const percent = Math.max(0, Math.min(100, (passed / total) * 100));
@@ -97,10 +107,10 @@ export default function App() {
             <div className="container mt-5 pt-5">
                 <div className="my-4">
                     <div className="d-flex justify-content-between">
-                        <span>⏰ 운영시간 08:30~17:50</span>
+                        <span>⏰ 출입문 개방시간 07:00~18:00</span>
                         <span>{timePercent.toFixed(1)}%</span>
                     </div>
-                    <div className="progress rounded-pill" style={{ height: "14px" }}>
+                    <div className="progress rounded-pill overflow-hidden" style={{ height: "14px", background: "#e9ecef" }}>
                         <div
                             className="progress-bar bg-info progress-bar-striped progress-bar-animated"
                             role="progressbar"
@@ -108,6 +118,9 @@ export default function App() {
                         />
                     </div>
                 </div>
+
+                {/* ✅ 테스트 버튼 */}
+                <TestToggleButton showTestMark={showTestMark} toggleTestMark={toggleTestMark} />
 
                 <h2 className="my-4">
                     성인정신과 의료진 목록{" "}
@@ -122,7 +135,10 @@ export default function App() {
                             <div className="col-md-6 mb-4" key={index}>
                                 <div className={`card shadow rounded-4 border-0 h-100 ${isDarkMode ? "bg-secondary text-white" : ""}`}>
                                     <div className="card-body">
-                                        <h5 className="card-title fw-bold">👨‍⚕️ {doc.name}</h5>
+                                        <h5 className="card-title fw-bold">
+                                            👨‍⚕️ {doc.name}
+                                            {showTestMark && index === 0 && " ✅"} {/* 테스트 마크 표시 */}
+                                        </h5>
                                         <p className="card-text">
                                             <strong>진료분야:</strong> {doc.specialty}
                                         </p>
