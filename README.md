@@ -1,10 +1,11 @@
-# Getting Started with Create React App
-
+# 사이트 스크래핑 서비스
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
-
-In the project directory, you can run:
+## 실행방법
+### 💾1. 백엔드 flask 서버 실행
+(root경로 기준) <p>
+cd backend <p>
+flask run
 
 ### `npm start`
 
