@@ -1,0 +1,43 @@
+.time-bar-container {
+    margin-top: 80px;
+    padding: 1rem;
+}
+
+.time-bar-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.progress-wave {
+    height: 16px;
+    width: 100%;
+    background: #e0e0e0;
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+}
+
+.wave {
+    height: 100%;
+    background: linear-gradient(
+            135deg,
+            #5ea6ff 25%,
+            #71d1ff 50%,
+            #5ea6ff 75%
+    );
+    animation: wave-flow 3s infinite ease-in-out;
+    transition: width 0.3s ease;
+    border-radius: 50px;
+}
+
+@keyframes wave-flow {
+    0% {
+        transform: translateX(-25%);
+    }
+    50% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(25%);
+    }
+}

@@ -1,66 +1,82 @@
-// TimeProgressBar.js
+
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "./TimeProgressBar.css";
 
 export default function TimeProgressBar() {
     const [percentage, setPercentage] = useState(0);
+    const [fakeMode, setFakeMode] = useState(false);
+    const [fakeDate, setFakeDate] = useState(null);
+
+    const getCurrentTime = () => {
+        if (fakeMode && fakeDate) return fakeDate;
+        return new Date();
+    };
 
     useEffect(() => {
-        const updateTime = () => {
-            const now = new Date();
-            const start = new Date();
-            const end = new Date();
+        const updateProgress = () => {
+            const now = getCurrentTime();
+            const day = now.getDay(); // 0 (Sun) ~ 6 (Sat)
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            const totalMinutes = hour * 60 + minute;
 
-            start.setHours(8, 30, 0);
-            end.setHours(17, 50, 0);
+            const open = 7 * 60; // 07:00
+            const close = 18 * 60; // 18:00
 
-            const lunchStart = new Date();
-            const lunchEnd = new Date();
-            lunchStart.setHours(12, 0, 0);
-            lunchEnd.setHours(13, 0, 0);
-
-            const totalTime = end - start;
-            const elapsed = now - start;
-
-            const clampedElapsed = Math.max(0, Math.min(elapsed, totalTime));
-            const percent = (clampedElapsed / totalTime) * 100;
-            setPercentage(percent);
+            if (totalMinutes < open) {
+                setPercentage(0);
+            } else if (totalMinutes > close) {
+                setPercentage(100);
+            } else {
+                const percent = ((totalMinutes - open) / (close - open)) * 100;
+                setPercentage(percent);
+            }
         };
 
-        updateTime();
-        const interval = setInterval(updateTime, 60 * 1000); // 매 1분마다 업데이트
+        updateProgress();
+        const interval = setInterval(updateProgress, 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [fakeMode, fakeDate]);
+
+    const isLunchTime = () => {
+        const now = getCurrentTime();
+        const hour = now.getHours();
+        return hour === 12;
+    };
+
+    const toggleTestTime = () => {
+        if (fakeMode) {
+            setFakeDate(null);
+            setFakeMode(false);
+        } else {
+            const mock = new Date();
+            mock.setHours(8);
+            mock.setMinutes(45);
+            mock.setSeconds(0);
+            mock.setMilliseconds(0);
+            mock.setDate(mock.getDate() - mock.getDay() + 1); // 월요일로 강제
+            setFakeDate(mock);
+            setFakeMode(true);
+        }
+    };
 
     return (
-        <div className="container my-4">
-            <div className="d-flex justify-content-between">
-                <span>🕗 8:30</span>
-                <span>🍽 점심 12:00~13:00</span>
-                <span>🕔 17:50</span>
+        <div className="time-bar-container">
+            <div className="time-bar-label">
+                출입 가능 시간: 07:00 ~ 18:00 {isLunchTime() && "🍱 점심시간 (12:00~13:00)"}
             </div>
-            <div className="progress my-2" style={{ height: "30px", borderRadius: "15px" }}>
-                {/* 전체 시간 진행 바 */}
+            <div className="progress-wave">
                 <div
-                    className="progress-bar bg-primary"
-                    role="progressbar"
-                    style={{ width: `${percentage}%` }}
-                >
-                    <strong>{Math.round(percentage)}%</strong>
-                </div>
-
-                {/* 점심 시간 영역 표시 (절대 위치) */}
-                <div
+                    className="wave"
                     style={{
-                        position: "absolute",
-                        left: `${((12.0 - 8.5) / (17.833 - 8.5)) * 100}%`,
-                        width: `${(1 / (17.833 - 8.5)) * 100}%`,
-                        height: "30px",
-                        backgroundColor: "rgba(255, 193, 7, 0.5)",
-                        zIndex: 0,
+                        width: `${percentage}%`,
+                        animationPlayState: fakeMode ? "paused" : "running",
                     }}
                 ></div>
             </div>
+            <button className="btn btn-outline-secondary mt-2" onClick={toggleTestTime}>
+                {fakeMode ? "✅ 테스트 시간 적용 중 (월 08:45)" : "테스트 시간 적용"}
+            </button>
         </div>
     );
 }
