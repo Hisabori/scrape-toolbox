@@ -1,59 +1,55 @@
 import React, { useEffect, useState } from "react";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
 export default function MapPage() {
     const [hospitals, setHospitals] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/hospitals") // ★ IP 수정: localhost 사용!
+        fetch("http://172.16.2.196:5000/api/hospitals")
             .then(res => res.json())
-            .then(data => setHospitals(data))
+            .then(data => {
+                console.log("✅ 병원 데이터 불러오기 성공:", data);
+                setHospitals(data);
+            })
             .catch(err => console.error("❌ 병원 데이터 로드 실패:", err));
     }, []);
 
     useEffect(() => {
-        const loadGoogleMapsScript = () => {
-            if (!window.google?.maps) {  // 수정: google.maps 까지 체크
-                const script = document.createElement("script");
-                script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDlFQVk01OR-LF-N-t2nqnvpcQ4gLRo0JY&libraries=places`;
-                script.async = true;   // ✅ 비동기
-                script.defer = true;   // ✅ defer 추가
-                script.onload = initMap;
-                document.head.appendChild(script);
-            } else {
-                initMap();
-            }
-        };
-
-        const initMap = () => {
-            if (!document.getElementById("map")) {
-                console.error("❌ map div가 없습니다!");
-                return;
-            }
-
-            if (hospitals.length === 0) return;
-
-            const map = new window.google.maps.Map(document.getElementById("map"), {
-                center: { lat: 37.5665, lng: 126.9780 },
-                zoom: 10,
-            });
-
-            hospitals.forEach(hospital => {
-                new window.google.maps.Marker({
-                    position: { lat: hospital.lat, lng: hospital.lon },
-                    map: map,
-                    title: hospital.name,
-                });
-            });
-        };
-
-        loadGoogleMapsScript();
+        console.log("🧭 hospitals 상태:", hospitals);
+        console.log("🌍 window.google 존재 여부:", !!window.google);
     }, [hospitals]);
 
+    const mapContainerStyle = {
+        width: "100%",
+        height: "500px",
+    };
+
+    const center = {
+        lat: 37.5665, // 서울
+        lng: 126.9780,
+    };
 
     return (
         <div>
             <h1>🗺️ 응급의료기관 지도</h1>
-            <div id="map" style={{ width: "100%", height: "500px" }}></div>
+            <LoadScript
+                googleMapsApiKey="AIzaSyDlFQVk01OR-LF-N-t2nqnvpcQ4gLRo0JY"
+                libraries={["places"]}
+            >
+                <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={center}
+                    zoom={10}
+                >
+                    {hospitals.map((hospital, index) => (
+                        <Marker
+                            key={index}
+                            position={{ lat: hospital.lat, lng: hospital.lon }}
+                            title={hospital.name}
+                        />
+                    ))}
+                </GoogleMap>
+            </LoadScript>
         </div>
     );
 }
